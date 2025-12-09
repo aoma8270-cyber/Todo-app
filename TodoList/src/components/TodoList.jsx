@@ -1,46 +1,60 @@
+import axios from "axios";
 import React from "react";
 
 const TodoList = ({ todos, setTodos }) => {
-  const handleRemoveTask = (index) => {
-    const newTodos = [...todos];
-    newTodos.splice(index, 1);
-    setTodos(newTodos);
-  };
+  const handleRemoveTask = async (id) => {
+    try {
+      await axios.delete(`http://localhost:3000/todos/${id}`)
+      const newTodos = todos.filter((todo) => todo.id !== id);
+      setTodos(newTodos);
+    } catch (error) {
+      console.error("削除エラー:", error)
+    }
+  }
+    
 
-  const handleUpdateTask = (index) => {
-    const newTodos = todos.map((todo, todoIndex) => {
-      if (todoIndex === index) {
-        todo.isCompleted = !todo.isCompleted;
+  const handleUpdateTask = async (id, currentCompleted) => {
+    try {
+      const response = await axios.put(`http://localhost:3000/todos/${id}`, {
+        completed: !currentCompleted,
+      })
+      const newTodos = todos.map((todo) => {
+      if (todo.id === id) {
+        return response.data
       }
       return todo;
-    });
+    })
     setTodos(newTodos);
+    } catch (error) {
+      console.error("更新エラー:", error)
+    }
+    
   };
 
   return (
     <ul className="space-y-3 p-4 bg-gray-50 rounded-lg">
-      {todos.map((todo, index) => (
+      {todos.map((todo) => (
         <li
           className={`bg-white p-4 shadow-md rounded-lg flex items-center justify-between transition duration-300 hover:shadow-lg mt-3" ${
-            todo.isCompleted ? "bg-green-50" : "bg-white"
+            todo.completed ? "bg-green-50" : "bg-white"
           }`}
-          key={index}
+          key={todo.id}
         >
           <input
             type="checkbox"
-            checked={todo.isCompleted}
-            onChange={() => handleUpdateTask(index)}
+            checked={todo.completed}
+            onChange={() => handleUpdateTask(todo.id, todo.completed)}
             className="mr-3 h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
           />
           <span
-           className={`text-lg ${todo.isCompleted ? "text-gray-400 line-through" : "text-gray-700"}`}>
-            {todo.task}
+           className={`text-lg ${todo.completed ? "text-gray-400 line-through" : "text-gray-700"}`}>
+            {todo.title || todo.task}
           </span>
           
           <span
-            onClick={() => handleRemoveTask(index)}
+            onClick={() => handleRemoveTask(todo.id)}
             style={{ cursor: "pointer" }}
-            className={`text-lg ${todo.isCompleted ? "text-gray-400 line-through" : "text-gray-700"}`}
+            className={`text-lg ${todo.completed ? "text-gray-400 line-through" : "text-gray-700"}`}
           >
             ×
           </span>

@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useState } from "react";
 
 const AddTodo = ({ setTodos }) => {
@@ -6,12 +7,22 @@ const AddTodo = ({ setTodos }) => {
     setTask(e.target.value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (task === "") return;
-    setTodos((todos) => [...todos, { task, isCompleted: false }]);
-    setTask("");
+    try {
+      const response = await axios.post("http://localhost:3000/todos", {
+        title: task,
+        isUrgent: false,
+        isImpotant: false,
+      })
+      setTodos((todos) => [...todos, response.data]);
+      setTask("");
+    } catch (error) {
+      console.error("追加に失敗しました", error)
+    }
   };
+
   return (
     <form className="flex gap-3 mb-6" onSubmit={handleSubmit}>
       <input
