@@ -13,15 +13,13 @@ app.use(cors({
 
 app.use(express.json());
 
-// --- ここが重要！POST（追加）機能 ---
 
-// 1. 取得 (GET)
 app.get('/todos', async (req, res) => {
   const todos = await prisma.todo.findMany();
   res.json(todos);
 });
 
-// 2. 追加 (POST) ★この部分が足りていなかったはずです
+
 app.post('/todos', async (req, res) => {
   const { title } = req.body;
   try {
@@ -37,7 +35,6 @@ app.post('/todos', async (req, res) => {
   }
 });
 
-// 3. 更新 (PUT)
 app.put('/todos/:id', async (req, res) => {
   const { id } = req.params;
   const { completed } = req.body;
@@ -48,7 +45,6 @@ app.put('/todos/:id', async (req, res) => {
   res.json(updatedTodo);
 });
 
-// 4. 削除 (DELETE)
 app.delete('/todos/:id', async (req, res) => {
   const { id } = req.params;
   const deletedTodo = await prisma.todo.delete({
