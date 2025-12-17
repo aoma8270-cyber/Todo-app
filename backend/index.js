@@ -21,11 +21,14 @@ app.get('/todos', async (req, res) => {
 
 
 app.post('/todos', async (req, res) => {
-  const { title } = req.body;
+  const { title, isUrgent, isImportant, category } = req.body;
   try {
     const newTodo = await prisma.todo.create({
       data: {
         title: title,
+        isUrgent: isUrgent,
+        isImportant: isImportant,
+        category: category || "Inbox",
       },
     });
     res.json(newTodo);
@@ -37,12 +40,21 @@ app.post('/todos', async (req, res) => {
 
 app.put('/todos/:id', async (req, res) => {
   const { id } = req.params;
-  const { completed } = req.body;
+  const { completed, isUrgent, isImportant, title, category } = req.body;
+  try {
   const updatedTodo = await prisma.todo.update({
     where: { id: Number(id) },
-    data: { completed: completed },
+    data: { 
+          completed: completed,
+          isUrgent: isUrgent,
+          isImportant: isImportant,
+         },
   });
   res.json(updatedTodo);
+} catch (e) {
+  console.error(e);
+  res.status(500).json({ erorr: '更新に失敗しました'})
+}
 });
 
 app.delete('/todos/:id', async (req, res) => {
